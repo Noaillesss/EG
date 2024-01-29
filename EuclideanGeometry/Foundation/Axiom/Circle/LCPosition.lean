@@ -191,7 +191,32 @@ lemma inx_pts_ne_center {l : DirLine P} {ω : Circle P} (h : DirLine.IsIntersect
   · apply (pt_lieson_ne_center (inx_pts_lieson_circle h).1).out
   apply (pt_lieson_ne_center (inx_pts_lieson_circle h).2).out
 
-theorem inx_pts_antipode_iff_center_lieson {l : DirLine P} {ω : Circle P} (h : DirLine.IsIntersected l ω) : IsAntipode ω (inx_pts_lieson_circle h).1 (inx_pts_lieson_circle h).2 ↔ ω.center LiesOn l := sorry
+theorem inx_pts_antipode_iff_center_lieson {l : DirLine P} {ω : Circle P} (h : DirLine.IsIntersected l ω) : IsAntipode ω (inx_pts_lieson_circle h).1 (inx_pts_lieson_circle h).2 ↔ ω.center LiesOn l := by
+  let A : P := (Inxpts h).front
+  let B : P := (Inxpts h).back
+  constructor
+  · intro ha
+    haveI : PtNe B A := ⟨Circle.antipode_distinct ha⟩
+    have eq : LIN A B = l := Line.eq_line_of_pt_pt_of_ne (inx_pts_lieson_dlin h).1 (inx_pts_lieson_dlin h).2
+    have : Collinear A ω.center B := (Circle.antipode_iff_collinear _ _ (inx_pts_lieson_circle h).1 (inx_pts_lieson_circle h).2).mp ha
+    have : ω.center LiesOn (LIN A B) := Line.pt_pt_maximal (Collinear.perm₁₃₂ this)
+    rw [eq] at this
+    exact this
+  intro hl
+  haveI : PtNe B A := ⟨by
+    intro eq
+    have : dist_pt_line ω.center l = ω.radius := (inx_pts_same_iff_tangent h).mp eq
+    have : ω.radius > 0 := ω.rad_pos
+    have : dist_pt_line ω.center l = 0 := (dist_eq_zero_iff_lies_on ω.center l).mpr hl
+    linarith
+    ⟩
+  have eq₁ : perp_foot ω.center l = ω.center := (perp_foot_eq_self_iff_lies_on ω.center l).mpr hl
+  have eq₂ : LIN A B = l := Line.eq_line_of_pt_pt_of_ne (inx_pts_lieson_dlin h).1 (inx_pts_lieson_dlin h).2
+  have : VEC A (perp_foot ω.center (LIN A B)) = VEC (perp_foot ω.center (LIN A B)) B := Circle.pts_lieson_circle_vec_eq (inx_pts_lieson_circle h).1 (inx_pts_lieson_circle h).2
+  rw [eq₂, eq₁] at this
+  show B = (VEC A ω.center) +ᵥ ω.center
+  rw [this]
+  simp
 
 theorem inxwith_iff_intersect {l : DirLine P} {ω : Circle P} : l InxWith ω ↔ DirLine.IsIntersected l ω := by
   unfold intersect

@@ -242,7 +242,29 @@ theorem antipode_symm {A B : P} {ω : Circle P} (ha : A LiesOn ω) (hb : B LiesO
   · apply pt_flip_symm
   apply pt_flip_symm
 
-theorem antipode_center_is_midpoint {A B : P} {ω : Circle P} (ha : A LiesOn ω) (hb : B LiesOn ω) (h : IsAntipode ω ha hb) : ω.center = (SEG A B).midpoint := pt_flip_center_is_midpoint h
+theorem antipode_distinct {A B : P} {ω : Circle P} {ha : A LiesOn ω} {hb : B LiesOn ω} (h : IsAntipode ω ha hb) : B ≠ A := by
+  have : VEC A ω.center = VEC ω.center B := by
+    show VEC A ω.center = B -ᵥ ω.center
+    symm
+    apply (eq_vadd_iff_vsub_eq _ _ _).mp h
+  intro eq
+  rw [eq] at this
+  have : (2 : ℝ) • VEC A ω.center = 0 := by
+    calc
+      _ = VEC A ω.center + VEC ω.center A := by rw [← this, two_smul]
+      _ = 0 := by rw [vec_add_vec, vec_same_eq_zero]
+  have : (2 : ℝ) * ω.radius = 0 := by
+    calc
+      _ = (2 : ℝ) * (dist ω.center A) := by rw [ha]
+      _ = (2 : ℝ) * ‖VEC A ω.center‖ := by rw [NormedAddTorsor.dist_eq_norm', Vec.mkPtPt]
+      _ = ‖(2 : ℝ) • VEC A ω.center‖ := by
+        rw [norm_smul]; norm_num
+      _ = 0 := by
+        rw [this]; norm_num
+  have : ω.radius > 0 := ω.rad_pos
+  linarith
+
+theorem antipode_center_is_midpoint {A B : P} {ω : Circle P} {ha : A LiesOn ω} {hb : B LiesOn ω} (h : IsAntipode ω ha hb) : ω.center = (SEG A B).midpoint := pt_flip_center_is_midpoint h
 
 theorem antipode_iff_collinear (A B : P) {ω : Circle P} [h : PtNe B A] (ha : A LiesOn ω) (hb : B LiesOn ω) : IsAntipode ω ha hb ↔ Collinear A ω.center B := by
   constructor
