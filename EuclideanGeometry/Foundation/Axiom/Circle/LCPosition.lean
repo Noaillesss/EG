@@ -317,21 +317,61 @@ theorem DirLC_intersection_eq_inxpts {l : DirLine P} {ω : Circle P} {A : P} (h 
   have hnc : ¬ (Collinear A (Inxpts h).front (Inxpts h).back) := three_pts_lieson_circle_not_collinear h₃ (inx_pts_lieson_circle h).1 (inx_pts_lieson_circle h).2
   tauto
 
+theorem DirLC_tangent_eq_tangent_pt {l : DirLine P} {ω : Circle P} {A : P} (h : l Tangent ω) (h₁ : A LiesOn l) (h₂ : A LiesOn ω) : A = (Tangentpt h) := by
+  have hi : DirLine.IsIntersected l ω := DirLC.intersect_iff_tangent_or_secant.mpr (Or.inl h)
+  rcases DirLC_intersection_eq_inxpts hi h₁ h₂ with heq | heq
+  · exact heq
+  rw [heq, (DirLC.inx_pts_same_iff_tangent hi).mpr h]
+  rfl
+
 theorem pt_pt_tangent_eq_tangent_pt {A B : P} {ω : Circle P} (h₁ : A LiesOut ω) (h₂ : B LiesOn ω) (ht : (DLIN A B (pt_liesout_ne_pt_lieson h₁ h₂).out.symm) Tangent ω) : B = Tangentpt ht := by
   haveI : PtNe A B := pt_liesout_ne_pt_lieson h₁ h₂
-  rcases (DirLC_intersection_eq_inxpts (intersect_iff_tangent_or_secant.mpr (Or.inl ht)) DirLine.snd_pt_lies_on_mk_pt_pt h₂) with heq | heq
-  exact heq
-  rw [(inx_pts_same_iff_tangent _).mpr ht] at heq
-  exact heq
+  apply DirLC_tangent_eq_tangent_pt ht DirLine.snd_pt_lies_on_mk_pt_pt h₂
 
 theorem chord_toDirLine_intersected {ω : Circle P} (s : Chord P ω) : DirLine.IsIntersected s.1.toDirLine ω := by
   show dist_pt_line ω.center s.1.toDirLine ≤ ω.radius
   rw [← s.2.1]
   apply dist_pt_line_shortest ω.center s.1.source DirLine.fst_pt_lies_on_mk_pt_pt
 
-theorem chord_toDirLine_inx_front_pt_eq_target {ω : Circle P} (s : Chord P ω) : (Inxpts (chord_toDirLine_intersected s)).front = s.1.target := sorry
+theorem chord_toDirLine_secant {ω : Circle P} (s : Chord P ω) : s.1.toDirLine Secant ω := by
+  haveI neI : PtNe s.1.target s.1.source := ⟨s.1.2⟩
+  rcases (DirLC.intersect_iff_tangent_or_secant).mp (chord_toDirLine_intersected s) with h | h
+  · exfalso
+    have eq : s.1.target = s.1.source := by
+      rw [DirLC_tangent_eq_tangent_pt h DirLine.snd_pt_lies_on_mk_pt_pt s.2.2, ← DirLC_tangent_eq_tangent_pt h DirLine.fst_pt_lies_on_mk_pt_pt s.2.1]
+    exact neI.out eq
+  exact h
 
-theorem chord_toDirLine_inx_back_pt_eq_source {ω : Circle P} (s : Chord P ω) : (Inxpts (chord_toDirLine_intersected s)).back = s.1.source := sorry
+theorem chord_toDirLine_inx_front_pt_eq_target {ω : Circle P} (s : Chord P ω) : (Inxpts (chord_toDirLine_intersected s)).front = s.1.target := by
+  haveI neI : PtNe s.1.target s.1.source := ⟨s.1.2⟩
+  have hl : s.1.target LiesOn s.1.toDirLine := DirLine.snd_pt_lies_on_mk_pt_pt
+  rcases (DirLC_intersection_eq_inxpts (chord_toDirLine_intersected s) hl s.2.2) with heq | heq
+  · exact heq.symm
+  exfalso
+  have heq' : s.1.source = (Inxpts (chord_toDirLine_intersected s)).front := by
+    rcases (DirLC_intersection_eq_inxpts (chord_toDirLine_intersected s) DirLine.fst_pt_lies_on_mk_pt_pt s.2.1) with hh | hh
+    · exact hh
+    exfalso
+    have : s.1.target = s.1.source := by rw [heq, ← hh]
+    exact neI.out this
+  haveI : PtNe (Inxpts (chord_toDirLine_intersected s)).front (Inxpts (chord_toDirLine_intersected s)).back := ⟨by
+    rw [← heq, ← heq']
+    exact neI.out.symm⟩
+  have eq : s.1.toDir = s.1.toDirLine.toDir := rfl
+  have eqn : s.1.toDir = -s.1.toDirLine.toDir := by
+    calc
+      _ = (VEC_nd s.1.source s.1.target).toDir := rfl
+      _ = (VEC_nd (Inxpts (chord_toDirLine_intersected s)).front (Inxpts (chord_toDirLine_intersected s)).back).toDir := by congr
+      _ = -s.1.toDirLine.toDir := sorry
+  sorry
+
+theorem chord_toDirLine_inx_back_pt_eq_source {ω : Circle P} (s : Chord P ω) : (Inxpts (chord_toDirLine_intersected s)).back = s.1.source := by
+  haveI neI : PtNe s.1.target s.1.source := ⟨s.1.2⟩
+  rcases (DirLC_intersection_eq_inxpts (chord_toDirLine_intersected s) DirLine.fst_pt_lies_on_mk_pt_pt s.2.1) with hh | hh
+  · exfalso
+    rw [chord_toDirLine_inx_front_pt_eq_target s] at hh
+    exact neI.out hh.symm
+  exact hh.symm
 
 /- Equivalent condition for tangency -/
 theorem pt_pt_tangent_perp {A B : P} {ω : Circle P} (h₁ : A LiesOut ω) (h₂ : B LiesOn ω) (ht : (DLIN A B (pt_liesout_ne_pt_lieson h₁ h₂).out.symm) Tangent ω) : (DLIN ω.center B (pt_lieson_ne_center h₂).out) ⟂ (DLIN A B (pt_liesout_ne_pt_lieson h₁ h₂).out.symm) := by
