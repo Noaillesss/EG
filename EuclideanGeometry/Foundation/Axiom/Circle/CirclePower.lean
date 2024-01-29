@@ -379,7 +379,10 @@ theorem secant_power_thm {ω : Circle P} {p : P} {l : DirLine P} (h₁ : DirLine
       rw [← NormedAddTorsor.dist_eq_norm', dist_comm, heq, mul_assoc, mul_comm, pow_two, inv_mul_cancel_left₀]
       apply dist_ne_zero.mpr hne.out.symm
 
-theorem intersecting_chords_thm {ω : Circle P} {S : P} {s₁ s₂ : Chord P ω} (h : S LiesInt ω) (h₁ : S LiesOn s₁) (h₂ : S LiesOn s₂) : (dist S s₁.1.source) * (dist S s₁.1.target) = (dist S s₂.1.source) * (dist S s₂.1.target) := sorry
+theorem intersecting_chords_thm {ω : Circle P} {S : P} {s₁ s₂ : Chord P ω} (h : S LiesInt ω) (h₁ : S LiesOn s₁) (h₂ : S LiesOn s₂) : (dist S s₁.1.source) * (dist S s₁.1.target) = (dist S s₂.1.source) * (dist S s₂.1.target) := by
+  have hl₁ : DirLine.IsIntersected s₁.1.toDirLine ω := chord_toDirLine_intersected s₁
+  have hl₂ : DirLine.IsIntersected s₂.1.toDirLine ω := chord_toDirLine_intersected s₂
+  rw [← chord_toDirLine_inx_front_pt_eq_target s₁, ← chord_toDirLine_inx_front_pt_eq_target s₂, ← chord_toDirLine_inx_back_pt_eq_source s₁, ← chord_toDirLine_inx_back_pt_eq_source s₂, mul_comm, chord_power_thm hl₁ (SegND.lies_on_toLine_of_lie_on h₁) h, mul_comm, chord_power_thm hl₂ (SegND.lies_on_toLine_of_lie_on h₂) h]
 
 theorem intersecting_secants_thm {ω : Circle P} {S : P} {l₁ l₂ : DirLine P} (h : S LiesOut ω) (h₁ : S LiesOn l₁) (h₂ : S LiesOn l₂) (hx₁ : DirLine.IsIntersected l₁ ω) (hx₂ : DirLine.IsIntersected l₂ ω) : (dist S (Inxpts hx₁).front) * (dist S (Inxpts hx₁).back) = (dist S (Inxpts hx₂).front) * (dist S (Inxpts hx₂).back) := by
   rw [secant_power_thm hx₁ h₁ h, secant_power_thm hx₂ h₂ h]
