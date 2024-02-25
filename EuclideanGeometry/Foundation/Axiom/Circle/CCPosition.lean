@@ -488,6 +488,20 @@ theorem inx_pts_line_perp_center_line {ω₁ : Circle P} {ω₂ : Circle P} (h :
   haveI : PtNe (Inxpts h).left (Inxpts h).right := ⟨inx_pts_distinct h⟩
   haveI : PtNe ω₁.center ω₂.center := ⟨intersected_centers_distinct h⟩
   show (LIN (Inxpts h).left (Inxpts h).right).toProj = (LIN ω₁.center ω₂.center).toProj.perp
+  have  : VEC (Inxpts h).right (Inxpts h).left = (2 * Real.sqrt (ω₁.radius ^ 2 - (radical_axis_dist_to_the_first ω₁ ω₂) ^ 2) * Complex.I) • (VEC_nd ω₁.center ω₂.center).toDir.unitVec := by
+    unfold Inxpts Vec.mkPtPt
+    simp
+    rw [← sub_smul]
+    ring_nf
+  -- have heq : VEC_nd (Inxpts h).right (Inxpts h).left = (2 * Real.sqrt (ω₁.radius ^ 2 - (radical_axis_dist_to_the_first ω₁ ω₂) ^ 2) * Complex.I) • (VEC_nd ω₁.center ω₂.center).toDir.unitVecND := by
+  --   apply this
+  -- have heq₁ : (LIN (Inxpts h).left (Inxpts h).right).toProj = (Complex.I • (VEC ω₁.center ω₂.center)).toProj := by
+  --   calc
+  --     _ = (SEG_nd (Inxpts h).right (Inxpts h).left).toProj := by
+  --       rw [Line.toProj_eq_seg_nd_toProj_of_lies_on Line.snd_pt_lies_on_mk_pt_pt Line.fst_pt_lies_on_mk_pt_pt]
+  --     _ = (VEC_nd (Inxpts h).right (Inxpts h).left).toProj := rfl
+  --     _ = (VEC_nd (Inxpts h).left (Inxpts h).right).toDir.unitVecND.toProj := sorry
+  --     _ = (Complex.I • (VEC_nd ω₁.center ω₂.center)).toProj := sorry
   sorry
   /-
   have hd : Complex.abs ((VEC_nd ω₁.center ω₂.center (intersected_centers_distinct h).symm).toDir.toVec) = 1 := by apply Dir.norm_of_dir_toVec_eq_one
